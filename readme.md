@@ -1,12 +1,47 @@
-# Modeling and Pricing Temperature Derivatives with Historical and AR(1) Residuals
+# Pricing Temperature Derivatives using Monte Carlo Techniques
 
-### Disclaimer : This paper / project is still in-progress. Implementation logic as well as the writing is subject to change
+## Overview of CME temperature derivatives
 
-## Abstract of the research paper
+Temperature derivatives traded on CME primarily rely on 2 indices : HDD and CDD which are defined as follows
 
-This project presents a data-driven framework for pricing temperature-linked derivatives, specifically contracts based on Cooling Degree Days (CDDs). Motivated by real-world hedging needs in the energy and insurance sectors, we develop a regime-aware pricing model grounded in conditional expectation theory. The methodology relies on simulating temperature paths using Monte Carlo techniques, employing both i.i.d. and AR(1) residual models, and comparing them against a benchmark derived from historical CDD distributions.
+$$ 
+HDD = \sum_{t} max(\theta_{base} - \theta_t , 0)
+$$
 
-We evaluate each model based on pricing accuracy, probabilistic confidence intervals, and out-of-sample robustness. Surprisingly, our findings suggest that i.i.d. noise models outperform AR(1)-based approaches in certain regimes despite the latter’s theoretical alignment with temperature autocorrelation. The final model not only predicts contract prices within a tight error margin but also provides actionable bounds for trade execution, enhancing real-world decision-making. 
+$$
+CDD = \sum_{t} max(\theta_t - \theta_{base} , 0)
+$$
 
+Where $ \theta $ represents temperature. 
+
+HDD stands for Heating Degree Days signifying need for heating. While CDD stands for Cooling Degree Days signifying need for cooling.
+
+These 2 values are then used as underlying for the derivatives which can be options, forwards,etc .
+
+A typical payoff for a HDD forward as follows : 
+
+$$
+Payoff = \alpha * HDD
+$$
+
+Where $ \alpha $ is called the notional. In the case of CME contracts this is $20.
+
+The purpose of these contracts is to hedge against weather risk.
+
+The purpose of this project is to price options on such forwards.
+
+
+## Overview of Methodology
+
+In one line : I generate a distribution for HDD by simulating temperature paths . Then, I shift the distribution to match its mean to a selected forward price observed on the market. Finally, use the shifted distribution to price the derivate using the Bachelier model. 
+
+Steps :
+
+1. First, fit a sine wave to the temperature data to capture seasonality
+2. Find differences of actual temperature from the sine wave
+3. Fit a time series model to the differences to generate temperature paths
+4. Calculate HDD for each path to generate the HDD distribution
+5. Shift such that expected HDD equals the price of a forward 
+6. Use the shifted distribution to price an option under the standard Bachelier model and also compute the option greeks 
 
 
